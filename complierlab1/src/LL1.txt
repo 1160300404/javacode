@@ -1,0 +1,51 @@
+Program->#offset=0;# P
+P->D P
+P->S P
+P->empty
+D->T id #enter(id.lexeme,T.type,offset);offset=offset+T.width;# ;
+D->record id #type='record';enter(id.lexeme,type,offset);# { P } 
+D->proc X id #type='proc';enter(id.lexeme,type,offset);# ( M ) { P }
+T->X #t=X.type;w=X.width;# C #T.type=C.type;T.width=C.width;#
+X->int #X.type=int ;X.width=4;#
+X->real #X.type=real; X.width=8;#
+X->char #X.type=char; X.width=1;#   
+C->[ num ] C #C.type=array( num.val,C1.type); C.width=num.val*C1.width;#
+C->empty #C.type=t; C.width=w;#
+S->id = E ; #p=lookup(id.lexeme); if p==nil then error ;gen(p '=' E.addr );#
+S->L = E ; #gen(L.addr'='E.addr)#
+S->return E ; #gen('return' E.addr)# 
+E->G E' #E.addr=newtemp();gen(E.addr '=' E'.addr '+' G.addr);#			     	
+E'->+ G E' #E'.addr=G.addr#
+E'->empty
+G->F G' #G.addr=newtemp();gen(G.addr '=' F.addr '*' G'.addr);#	
+G'->* F G' #G'.addr=F.addr#
+G'->empty 
+F->( E ) #F.addr=E.addr#
+F->id #F.addr=lookup(id.lexeme);if F.addr==nil then error;#
+F->digit #F.addr=digit.lex#
+F->ch #F.addr=ch.lex#
+I->E relop E #I.truelist = makelist(nextquad);I.falselist = makelist(nextquad+1);gen('if ' E1.addr relop E2.addr 'goto _');gen('goto _');#
+I->true #I.truelist = makelist(nextquad);gen('goto _');#
+I->false ##I.falselist = makelist(nextquad);gen('goto _');##
+I->( B ) #I.truelist = B.truelist ; I.falselist = B.falselist ;#
+I-> not B #I.truelist = B.falselist;I.falselist = B.truelist;#
+B-> H B' 
+B'->or M H B' #B.truelist= merge(H1.truelist,H2.truelist );B.falselist = H2.falselist ;backpatch(H1.falselist, M.quad );#
+B'->empty
+H->I H'
+H'->and M I H' #H.truelist= I2.truelist;H.falselist = merge(I1.falselist,I2.falselist) ;backpatch(I1.truelist, M.quad );#
+H'->empty
+M->empty #M.quad = nextquad ;#
+S->if B then M3 S #S.nextlist=merge(B.falselist, S1.nextlist);;backpatch(B.truelist, M3.quad);#
+N->empty #N.nextlist = makelist(nextquad);gen('goto _'); #
+S->while M B M do S {S.nextlist = B.falselist;backpatch( S1.nextlist, M1.quad );backpatch( B.truelist, M2.quad );gen('goto' M1.quad);}
+S->call id ( Elist ) ; #n=0;for q中的每个t do {gen('param' t);n=n+1;}gen('call' id.addr ',' n)#
+Elist->, E Elist #将E.addr添加到q的队尾#
+Elist->E
+Elist->empty
+relop-><
+relop-><=
+relop->==
+relop->!=
+relop->>
+relop->>=

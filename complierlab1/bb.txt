@@ -1,0 +1,12 @@
+int a;
+h=5;
+a=3+5;
+int[5][4] b;
+b[0][1] = 3;
+int a;
+int[3][5] z;
+proc int w(int i){return 3;}
+if a< 5 then a=3;
+while a< 5 do a=3;
+a='t'+3;
+

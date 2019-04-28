@@ -1,0 +1,50 @@
+Program->#a1# P
+P->D P
+P->S P
+P->empty
+D->T id #a2# ;
+D->record id #a3# { P } 
+D->proc X id #a4# ( M ) { P }
+M->X id #a36# M'
+M'->, X id #a37# M'
+M'->empty
+T->X #a5# C #a6#
+X->int #a33#
+X->real #a34#
+X->char #a35#
+C->[ num ] C #a7#
+C->empty #a8#
+S->id = E ; #a9#
+S->L = E ; #a10#
+S->return F ; #a11#
+E->G E' #a12#			     	
+E'->+ G E' #a13#
+E'->empty
+G->F G' #a14#	
+G'->* F G' #a15#
+G'->empty 
+F->( E ) #a16#
+F->id #a17#
+F->digit #a18#
+F->ch #a19#
+B->E relop E #a20#
+B->true #a21#
+B->false #a22#
+B->( B ) #a23#
+B-> not B #a24#
+M3->empty #a27#
+M1->empty #a38#
+M2->empty #a39#
+S->if B then M3 S #a28#
+N->empty #a29#
+S->while M1 B M2 do S #a30#
+S->call id #a41# ( Elist ) ; #a31#
+Elist->, E Elist #a32#
+Elist->E #a40#
+Elist->empty
+relop-><
+relop-><=
+relop->==
+relop->!=
+relop->>
+relop->>=
